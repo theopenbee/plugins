@@ -39,21 +39,29 @@ export function fakeFetch(routes) {
   const served = new Map();
   const fetch = async (url) => {
     fetch.calls.push(url);
-    const route = routes[url];
+    const key = url.split("?")[0];
+    const route = routes[key];
     let spec = route ?? { status: 404, json: { error: "Not found" } };
     if (Array.isArray(route)) {
-      const index = served.get(url) ?? 0;
-      served.set(url, index + 1);
+      const index = served.get(key) ?? 0;
+      served.set(key, index + 1);
       spec = route[Math.min(index, route.length - 1)];
     }
     if (spec.error) throw new TypeError("fetch failed");
     const status = spec.status ?? 200;
     const body = spec.body ?? Buffer.from(JSON.stringify(spec.json ?? {}));
+    const read = async () => {
+      if (spec.bodyError) throw new TypeError("terminated");
+      return body;
+    };
     return {
       ok: status >= 200 && status < 300,
       status,
-      json: async () => JSON.parse(body.toString()),
-      arrayBuffer: async () => body.buffer.slice(body.byteOffset, body.byteOffset + body.length),
+      json: async () => JSON.parse((await read()).toString()),
+      arrayBuffer: async () => {
+        const buf = await read();
+        return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
+      },
     };
   };
   fetch.calls = [];

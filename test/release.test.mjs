@@ -22,8 +22,8 @@ function plan(routes, catalog = '{"new":true}\n') {
   return planRelease({ registry: createRegistry({ fetch: fakeFetch(routes) }), catalog });
 }
 
-test("unpublished package is 1.0.0", async () => {
-  assert.deepEqual(await plan({}), { publish: true, version: "1.0.0" });
+test("leaves the first publish of the package to a maintainer", async () => {
+  assert.deepEqual(await plan({}), { publish: false, missing: true });
 });
 
 test("first release of this schema is 1.0.0", async () => {

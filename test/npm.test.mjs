@@ -6,11 +6,32 @@ import { fakeFetch } from "./helpers.mjs";
 
 const url = "https://registry.npmjs.org/@theopenbee%2Fchannel-discord";
 
-test("encodes scoped names", async () => {
+test("encodes scoped names and bypasses the registry cache", async () => {
   const fetch = fakeFetch({ [url]: { json: { name: "@theopenbee/channel-discord" } } });
-  const doc = await createRegistry({ fetch }).packument("@theopenbee/channel-discord");
-  assert.deepEqual(fetch.calls, [url]);
+  const doc = await createRegistry({ fetch, now: () => 42 }).packument("@theopenbee/channel-discord");
+  assert.deepEqual(fetch.calls, [`${url}?t=42`]);
   assert.equal(doc.name, "@theopenbee/channel-discord");
+});
+
+test("retries when the packument body is cut off", async () => {
+  const fetch = fakeFetch({ [url]: [{ bodyError: true }, { json: { name: "ok" } }] });
+  const doc = await createRegistry({ fetch, retryDelay: 0 }).packument("@theopenbee/channel-discord");
+  assert.equal(doc.name, "ok");
+  assert.equal(fetch.calls.length, 2);
+});
+
+test("retries when the tarball body is cut off", async () => {
+  const tgz = "https://registry.npmjs.org/x/-/x-1.0.0.tgz";
+  const fetch = fakeFetch({ [tgz]: [{ bodyError: true }, { body: Buffer.from("abc") }] });
+  const buf = await createRegistry({ fetch, retryDelay: 0 }).download(tgz);
+  assert.equal(buf.toString(), "abc");
+  assert.equal(fetch.calls.length, 2);
+});
+
+test("does not retry client errors", async () => {
+  const fetch = fakeFetch({ [url]: { status: 403 } });
+  await assert.rejects(createRegistry({ fetch, retryDelay: 0 }).packument("@theopenbee/channel-discord"), /403/);
+  assert.equal(fetch.calls.length, 1);
 });
 
 test("returns null for 404", async () => {

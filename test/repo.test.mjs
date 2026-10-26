@@ -108,7 +108,20 @@ test("rejects duplicate package", async () => {
 
 test("rejects official package outside theopenbee repo", async () => {
   const errors = await errorsOf({ [discord]: discordEntry({ repository: "https://github.com/someone/channel-discord" }) });
-  assert.deepEqual(errors, [`${discord}: official packages must have a repository under https://github.com/theopenbee/`]);
+  assert.deepEqual(errors, [`${discord}: official packages must have a repository https://github.com/theopenbee/<repo>`]);
+});
+
+test("rejects official repository paths that leave theopenbee", async () => {
+  for (const repository of [
+    "https://github.com/theopenbee/../evil/channel-discord",
+    "https://github.com/theopenbee/..",
+    "https://github.com/theopenbee/channel-discord/../../evil",
+    "https://github.com/theopenbee.evil.com/channel-discord",
+  ]) {
+    const errors = await errorsOf({ [discord]: discordEntry({ repository }) });
+    assert.equal(errors.length, 1, repository);
+    assert.match(errors[0], /official packages must have a repository/);
+  }
 });
 
 test("accepts external package with any https repository", async () => {

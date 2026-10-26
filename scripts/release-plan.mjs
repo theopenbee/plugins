@@ -9,4 +9,8 @@ if (process.env.GITHUB_OUTPUT) {
   await appendFile(process.env.GITHUB_OUTPUT, `publish=${plan.publish}\nversion=${plan.version ?? ""}\n`);
 }
 
-console.log(plan.publish ? `publish ${plan.version}` : "catalog unchanged, nothing to publish");
+if (plan.missing) {
+  console.log("@theopenbee/plugins is not on npm yet; a maintainer publishes the first version by hand");
+} else {
+  console.log(plan.publish ? `publish ${plan.version}` : "catalog unchanged, nothing to publish");
+}

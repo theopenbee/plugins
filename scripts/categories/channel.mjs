@@ -72,7 +72,8 @@ export function inspectManifest(manifest, id) {
   }
   errors.push(...configErrors(manifest.config));
   if (errors.length > 0) return { errors, info: null };
-  const info = { name: manifest.name === undefined ? { en: id } : localized(manifest.name) };
+  const { en, ...names } = localized(manifest.name ?? {});
+  const info = { name: { en: en || id, ...names } };
   if (manifest.description !== undefined) info.description = localized(manifest.description);
   info.protocol_version = manifest.protocol_version;
   return { errors, info };

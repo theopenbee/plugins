@@ -37,7 +37,7 @@ const fieldMessages = {
 };
 
 const officialScope = "@theopenbee/";
-const officialRepository = "https://github.com/theopenbee/";
+const officialRepository = /^https:\/\/github\.com\/theopenbee\/(?!\.+$)[A-Za-z0-9._-]+$/;
 
 export function isOfficial(packageName) {
   return packageName.startsWith(officialScope);
@@ -168,8 +168,8 @@ export async function checkRepo(repo) {
     const previous = packages.get(data.package);
     if (previous) report(`package "${data.package}" is already registered in ${previous}`);
     else packages.set(data.package, entry.file);
-    if (isOfficial(data.package) && !data.repository.startsWith(officialRepository)) {
-      report(`official packages must have a repository under ${officialRepository}`);
+    if (isOfficial(data.package) && !officialRepository.test(data.repository)) {
+      report("official packages must have a repository https://github.com/theopenbee/<repo>");
     }
   }
   return errors;

@@ -106,3 +106,11 @@ test("validateId", () => {
   assert.match(channel.validateId("a"), /must match/);
   assert.match(channel.validateId("a".repeat(33)), /must match/);
 });
+
+test("fills a missing or empty English name with the id", () => {
+  const nameOf = (name) => channel.inspectManifest(manifest({ name }), "discord").info.name;
+  assert.deepEqual(nameOf({ zh: "飞书" }), { en: "discord", zh: "飞书" });
+  assert.deepEqual(nameOf(""), { en: "discord" });
+  assert.deepEqual(nameOf({}), { en: "discord" });
+  assert.deepEqual(nameOf({ en: "", zh: "飞书" }), { en: "discord", zh: "飞书" });
+});

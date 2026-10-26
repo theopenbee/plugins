@@ -18,11 +18,10 @@ function latestRelease(versions, major) {
 }
 
 export async function planRelease({ registry, name = "@theopenbee/plugins", catalog }) {
-  const first = { publish: true, version: `${SCHEMA_VERSION}.0.0` };
   const doc = await registry.packument(name);
-  if (!doc) return first;
+  if (!doc) return { publish: false, missing: true };
   const latest = latestRelease(Object.keys(doc.versions ?? {}), SCHEMA_VERSION);
-  if (!latest) return first;
+  if (!latest) return { publish: true, version: `${SCHEMA_VERSION}.0.0` };
   const tgz = await registry.download(doc.versions[latest.version].dist.tarball);
   const current = readPackageFiles(tgz, ["catalog.json"]).get("catalog.json")?.toString("utf8");
   if (current === catalog) return { publish: false };

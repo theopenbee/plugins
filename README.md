@@ -93,11 +93,12 @@ The published package contains one file, `catalog.json`:
 
 ### Reading the catalog
 
-1. Fetch `https://registry.npmjs.org/@theopenbee/plugins` and pick the highest version whose major equals the `schema_version` you support.
+1. Fetch `https://registry.npmjs.org/@theopenbee/plugins` and pick the highest non-prerelease version whose major equals the `schema_version` you support.
 2. Download that version's tarball, check it against its `integrity`, and read `package/catalog.json`.
 3. If npmjs is unreachable, use the same paths on `https://registry.npmmirror.com`, which may lag behind. Keep the last catalog you read.
 4. Show only categories you support and ignore fields you do not know. Plugins whose `protocol_version` you do not support, or whose `min_openbee_version` is newer than you, can be shown but not installed. Show the `deprecated` notice when present.
-5. Install with `openbee plugin install <package>@<version>`, using the exact version.
+5. Install with `openbee plugin install <package>@<version>`, using the exact version. When an installed plugin's version differs from the catalog's, offer the catalog version as an update.
+6. The catalog is not required for installing: plugins installed by hand with `openbee plugin install` keep working whether or not they are listed.
 
 ### Dependencies
 
@@ -105,7 +106,7 @@ The catalog pins the plugin package itself. A plugin's own dependencies are reso
 
 ## Versioning
 
-The major version of `@theopenbee/plugins` equals `schema_version`. It changes only when `catalog.json` changes in a way older readers cannot handle; new categories and new optional fields keep the major version. Each publish bumps the patch version of the latest release, and nothing is published when the catalog is unchanged. The `version` in this repository's `package.json` is not updated; CI sets it at publish time.
+The major version of `@theopenbee/plugins` equals `schema_version`. It changes only when `catalog.json` changes in a way older readers cannot handle; new categories and new optional fields keep the major version. Each publish bumps the patch version of the latest release, and nothing is published when the catalog is unchanged. The `version` in this repository's `package.json` is not updated; CI sets it at publish time. The very first version is published by hand, after which CI publishes through npm trusted publishing.
 
 ## Development
 
