@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/theopenbee/plugins/blob/main/schema/entry.schema.json",
+  "title": "openbee plugin catalog entry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["package", "version", "repository", "maintainers"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "package": {
+      "description": "npm package name",
+      "type": "string",
+      "maxLength": 214,
+      "pattern": "^(?:@[a-z0-9][a-z0-9._~-]*/)?[a-z0-9][a-z0-9._~-]*$"
+    },
+    "version": {
+      "description": "Exact released version approved for the catalog",
+      "type": "string",
+      "pattern": "^(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)$"
+    },
+    "repository": {
+      "description": "https URL of the source repository",
+      "type": "string",
+      "pattern": "^https://\\S+$"
+    },
+    "maintainers": {
+      "description": "GitHub usernames allowed to update this entry",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$"
+      }
+    },
+    "tags": {
+      "description": "Tag ids from tags.json",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "min_openbee_version": {
+      "description": "Lowest openbee version the plugin works with",
+      "type": "string",
+      "pattern": "^(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)$"
+    },
+    "deprecated": {
+      "description": "Deprecation notice; its presence marks the plugin as deprecated",
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "object",
+          "required": ["en"],
+          "minProperties": 1,
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      ]
+    }
+  }
+}

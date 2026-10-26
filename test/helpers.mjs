@@ -1,3 +1,6 @@
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import { gzipSync } from "node:zlib";
 
 function tarHeader(name, size) {
@@ -54,4 +57,34 @@ export function fakeFetch(routes) {
   };
   fetch.calls = [];
   return fetch;
+}
+
+export const defaultCategories = [{ id: "channel", name: { en: "Channels", zh: "渠道" } }];
+
+export const defaultTags = [
+  { id: "im", name: { en: "Instant messaging", zh: "即时通讯" } },
+  { id: "global", name: { en: "Global platforms", zh: "海外平台" } },
+];
+
+export function discordEntry(overrides = {}) {
+  return {
+    package: "@theopenbee/channel-discord",
+    version: "0.1.0",
+    repository: "https://github.com/theopenbee/channel-discord",
+    maintainers: ["Qsnh"],
+    tags: ["im", "global"],
+    ...overrides,
+  };
+}
+
+export async function writeRepo(entries, { categories = defaultCategories, tags = defaultTags } = {}) {
+  const root = await mkdtemp(join(tmpdir(), "catalog-"));
+  const files = { "categories.json": categories, "tags.json": tags, ...entries };
+  for (const [path, value] of Object.entries(files)) {
+    if (value === undefined) continue;
+    const target = join(root, path);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, typeof value === "string" ? value : JSON.stringify(value, null, 2));
+  }
+  return root;
 }
