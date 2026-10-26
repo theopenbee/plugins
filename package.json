@@ -1,0 +1,44 @@
+{
+  "name": "@theopenbee/plugins",
+  "version": "1.0.0",
+  "description": "Catalog of plugins that can be installed in openbee",
+  "keywords": [
+    "openbee",
+    "openbee-plugin",
+    "catalog"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theopenbee/plugins.git"
+  },
+  "homepage": "https://github.com/theopenbee/plugins#readme",
+  "bugs": {
+    "url": "https://github.com/theopenbee/plugins/issues"
+  },
+  "type": "module",
+  "main": "./catalog.json",
+  "exports": {
+    ".": "./catalog.json",
+    "./catalog.json": "./catalog.json"
+  },
+  "files": [
+    "catalog.json"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.mjs",
+    "prepack": "npm run build"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0"
+  }
+}
