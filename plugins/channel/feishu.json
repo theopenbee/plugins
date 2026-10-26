@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schema/entry.schema.json",
+  "package": "@theopenbee/channel-lark",
+  "version": "0.1.0",
+  "repository": "https://github.com/theopenbee/channel-lark",
+  "maintainers": ["Qsnh"],
+  "tags": ["im", "china", "global"]
+}

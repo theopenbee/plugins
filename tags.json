@@ -1,0 +1,6 @@
+[
+  { "id": "im", "name": { "en": "Instant messaging", "zh": "即时通讯" } },
+  { "id": "project-management", "name": { "en": "Project management", "zh": "项目管理" } },
+  { "id": "china", "name": { "en": "China platforms", "zh": "国内平台" } },
+  { "id": "global", "name": { "en": "Global platforms", "zh": "海外平台" } }
+]
