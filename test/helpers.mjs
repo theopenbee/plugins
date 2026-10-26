@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -87,4 +88,36 @@ export async function writeRepo(entries, { categories = defaultCategories, tags 
     await writeFile(target, typeof value === "string" ? value : JSON.stringify(value, null, 2));
   }
   return root;
+}
+
+export const discordManifest = {
+  protocol_version: 1,
+  id: "discord",
+  name: { en: "Discord", zh: "Discord" },
+  description: { en: "Discord bot channel", zh: "Discord 机器人渠道" },
+  command: ["node", "dist/index.js"],
+  config: [{ key: "token", type: "secret", required: true }],
+};
+
+export function npmPackage({
+  name = "@theopenbee/channel-discord",
+  version = "0.1.0",
+  files,
+  integrity,
+  time = "2026-10-25T08:00:00.000Z",
+} = {}) {
+  const tgz = makeTgz(files ?? { "package.json": { name, version, license: "MIT" }, "openbee.plugin.json": discordManifest });
+  const base = name.split("/").pop();
+  const tarball = `https://registry.npmjs.org/${name}/-/${base}-${version}.tgz`;
+  const dist = { tarball, integrity: integrity ?? "sha512-" + createHash("sha512").update(tgz).digest("base64") };
+  return {
+    tarball,
+    integrity: dist.integrity,
+    routes: {
+      [`https://registry.npmjs.org/${name.replace("/", "%2F")}`]: {
+        json: { name, versions: { [version]: { name, version, dist } }, time: { [version]: time } },
+      },
+      [tarball]: { body: tgz },
+    },
+  };
 }
