@@ -6,7 +6,7 @@ const reservedIds = ["local"];
 const reservedConfigKeys = ["enabled", "bot_name"];
 const fieldTypes = ["string", "secret", "bool", "int", "list"];
 
-function isObject(value) {
+export function isObject(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
@@ -56,7 +56,7 @@ function configErrors(config) {
   return errors;
 }
 
-export function inspectManifest(manifest, id) {
+export function inspectCommon(manifest, id) {
   if (!isObject(manifest)) return { errors: [`${manifestFile} must be a JSON object`], info: null };
   const errors = [];
   if (manifest.protocol_version !== protocolVersion) {
@@ -77,4 +77,15 @@ export function inspectManifest(manifest, id) {
   if (manifest.description !== undefined) info.description = localized(manifest.description);
   info.protocol_version = manifest.protocol_version;
   return { errors, info };
+}
+
+export function withErrors(result, errors) {
+  if (errors.length === 0) return result;
+  return { errors: [...result.errors, ...errors], info: null };
+}
+
+export function inspectManifest(manifest, id) {
+  const result = inspectCommon(manifest, id);
+  if (!isObject(manifest) || manifest.type === undefined || manifest.type === "channel") return result;
+  return withErrors(result, [`manifest type ${JSON.stringify(manifest.type)} is not a channel`]);
 }

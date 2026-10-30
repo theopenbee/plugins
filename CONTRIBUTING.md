@@ -4,8 +4,8 @@ Plugins enter the catalog, and change version in it, only through pull requests.
 
 ## Register a plugin
 
-1. Publish the plugin to npm. The package must have its manifest (`openbee.plugin.json` for channels) at the package root and a `license` in `package.json`.
-2. Add `plugins/<category>/<id>.json`. For channels, `<id>` is the `id` in `openbee.plugin.json`.
+1. Publish the plugin to npm. The package must have its manifest (`openbee.plugin.json` for channels and engines) at the package root and a `license` in `package.json`.
+2. Add `plugins/<category>/<id>.json`. For channels and engines, `<id>` is the `id` in `openbee.plugin.json`.
 
    ```json
    {

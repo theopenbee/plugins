@@ -1,3 +1,4 @@
 [
-  { "id": "channel", "name": { "en": "Channels", "zh": "渠道" } }
+  { "id": "channel", "name": { "en": "Channels", "zh": "渠道" } },
+  { "id": "engine", "name": { "en": "Engines", "zh": "引擎" } }
 ]
