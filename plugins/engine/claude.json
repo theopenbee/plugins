@@ -1,0 +1,7 @@
+{
+  "$schema": "../../schema/entry.schema.json",
+  "package": "@theopenbee/engine-claude",
+  "version": "0.1.1",
+  "repository": "https://github.com/theopenbee/engine-claude",
+  "maintainers": ["Qsnh"]
+}
