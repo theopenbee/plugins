@@ -1,7 +1,7 @@
 {
   "$schema": "../../schema/entry.schema.json",
   "package": "@theopenbee/channel-weixin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": "https://github.com/theopenbee/channel-weixin",
   "maintainers": ["Qsnh"],
   "tags": ["im", "china"]
