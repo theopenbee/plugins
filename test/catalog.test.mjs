@@ -72,6 +72,24 @@ test("writes plugin keys in a fixed order and omits absent optional fields", () 
     "tarball",
   ]);
   assert.deepEqual(plugin.tags, []);
+  assert.equal("icon" in plugin, false);
+});
+
+test("writes icon right after description", () => {
+  const icon = '<svg xmlns="http://www.w3.org/2000/svg"/>';
+  const repo = { categories: defaultCategories, tags: defaultTags, entries: [entry("discord", official)], errors: [] };
+  const info = { name: { en: "Discord" }, description: { en: "Bot" }, icon, protocol_version: 1 };
+  const [plugin] = buildCatalog(repo, new Map([["plugins/channel/discord.json", { ...resolvedFor("discord"), info }]])).plugins;
+  assert.equal(plugin.icon, icon);
+  assert.deepEqual(Object.keys(plugin).slice(5, 9), ["name", "description", "icon", "protocol_version"]);
+});
+
+test("writes icon after name when there is no description", () => {
+  const icon = '<svg xmlns="http://www.w3.org/2000/svg"/>';
+  const repo = { categories: defaultCategories, tags: defaultTags, entries: [entry("discord", official)], errors: [] };
+  const info = { name: { en: "Discord" }, icon, protocol_version: 1 };
+  const [plugin] = buildCatalog(repo, new Map([["plugins/channel/discord.json", { ...resolvedFor("discord"), info }]])).plugins;
+  assert.deepEqual(Object.keys(plugin).slice(5, 8), ["name", "icon", "protocol_version"]);
 });
 
 test("includes optional fields and normalizes deprecated", () => {

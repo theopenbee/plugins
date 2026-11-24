@@ -41,11 +41,25 @@ The category and id come from the file path. For channels the id is the channel 
 | `min_openbee_version` | no | Lowest openbee version the plugin works with. |
 | `deprecated` | no | Deprecation notice, a string or `{"en": "...", "zh": "..."}`. Its presence marks the plugin as deprecated. |
 
-Name and description are not part of the entry. They are read from the plugin's own manifest.
+Name, description and icon are not part of the entry. They are read from the plugin's own manifest.
 
 ## Official plugins
 
 A plugin is official when its package is in the `@theopenbee` npm scope. Only members of the theopenbee npm organization can publish to that scope, and entries cannot declare themselves official. Official entries must point to a repository under `https://github.com/theopenbee/`.
+
+## Icons
+
+A plugin gets a logo in openbee by setting `icon` in its manifest to an SVG file in the package, such as `"icon": "icon.svg"`. The catalog embeds that file, so openbee can show the logo before the plugin is installed. Draw it in one colour with `currentColor`; openbee tints it to match the text around it.
+
+The icon must pass the same rules openbee applies:
+
+| Rule | Requirement |
+|---|---|
+| Path | Relative path to an `.svg` file inside the package, with no `..` leading out of it |
+| Size | At most 32 KiB |
+| Root | One `<svg>` element with `xmlns="http://www.w3.org/2000/svg"` |
+| Content | Well-formed UTF-8 XML; no `<script>` or `<foreignObject>` elements and no `on*` attributes; `href` and `xlink:href` only to `#` fragments |
+| Prolog | No DOCTYPE; no processing instructions other than a leading `<?xml version="1.0" encoding="UTF-8"?>` declaration |
 
 ## Checks
 
@@ -54,7 +68,8 @@ Every pull request runs `npm run validate`, which checks every entry:
 - the path, category, id and fields are valid, tags exist, and no package is registered twice;
 - `package@version` is published on registry.npmjs.org and its tarball matches the npm integrity;
 - the tarball's `package.json` has the same name and version and declares a license;
-- the plugin manifest passes the category's rules (the same rules openbee applies to `openbee.plugin.json`; engine manifests must also declare `"type": "engine"` and no `setup`).
+- the plugin manifest passes the category's rules (the same rules openbee applies to `openbee.plugin.json`; engine manifests must also declare `"type": "engine"` and no `setup`);
+- the manifest's `icon`, when set, passes the [icon rules](#icons).
 
 Tarballs are read in memory. Nothing is extracted to disk and no package code runs.
 
@@ -76,6 +91,7 @@ The published package contains one file, `catalog.json`:
       "official": true,
       "name": { "en": "Discord", "zh": "Discord" },
       "description": { "en": "Discord bot channel", "zh": "Discord 机器人渠道" },
+      "icon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\">...</svg>",
       "protocol_version": 1,
       "license": "MIT",
       "repository": "https://github.com/theopenbee/channel-discord",
@@ -89,14 +105,14 @@ The published package contains one file, `catalog.json`:
 }
 ```
 
-`name`, `description`, `deprecated` and the vocabulary names are objects keyed by language; fall back to `en`. `description`, `min_openbee_version` and `deprecated` are left out when not set. Plugins are sorted by category, then id.
+`name`, `description`, `deprecated` and the vocabulary names are objects keyed by language; fall back to `en`. `icon` is the SVG markup of the file the manifest's `icon` names. `description`, `icon`, `min_openbee_version` and `deprecated` are left out when not set. Plugins are sorted by category, then id.
 
 ### Reading the catalog
 
 1. Fetch `https://registry.npmjs.org/@theopenbee/plugins` and pick the highest non-prerelease version whose major equals the `schema_version` you support.
 2. Download that version's tarball, check it against its `integrity`, and read `package/catalog.json`.
 3. If npmjs is unreachable, use the same paths on `https://registry.npmmirror.com`, which may lag behind. Keep the last catalog you read.
-4. Show only categories you support and ignore fields you do not know. Plugins whose `protocol_version` you do not support, or whose `min_openbee_version` is newer than you, can be shown but not installed. Show the `deprecated` notice when present.
+4. Show only categories you support and ignore fields you do not know. Plugins whose `protocol_version` you do not support, or whose `min_openbee_version` is newer than you, can be shown but not installed. Show the `deprecated` notice when present. Check `icon` against the [icon rules](#icons) before showing it.
 5. Install with `openbee plugin install <package>@<version>`, using the exact version. When an installed plugin's version differs from the catalog's, offer the catalog version as an update.
 6. The catalog is not required for installing: plugins installed by hand with `openbee plugin install` keep working whether or not they are listed.
 

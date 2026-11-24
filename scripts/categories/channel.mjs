@@ -1,3 +1,5 @@
+import { iconPath } from "../lib/icon.mjs";
+
 export const manifestFile = "openbee.plugin.json";
 
 const protocolVersion = 1;
@@ -70,13 +72,16 @@ export function inspectCommon(manifest, id) {
   for (const text of ["name", "description"]) {
     if (manifest[text] !== undefined && !isLocalized(manifest[text])) errors.push(`${text} must be a string or an object of strings`);
   }
+  if (manifest.icon !== undefined && iconPath(manifest.icon) === null) {
+    errors.push(`icon ${JSON.stringify(manifest.icon)} must be a relative path to an .svg file inside the plugin`);
+  }
   errors.push(...configErrors(manifest.config));
   if (errors.length > 0) return { errors, info: null };
   const { en, ...names } = localized(manifest.name ?? {});
   const info = { name: { en: en || id, ...names } };
   if (manifest.description !== undefined) info.description = localized(manifest.description);
   info.protocol_version = manifest.protocol_version;
-  return { errors, info };
+  return manifest.icon === undefined ? { errors, info } : { errors, info, icon: manifest.icon };
 }
 
 export function withErrors(result, errors) {
