@@ -1,4 +1,5 @@
 import { loadCategory } from "./categories.mjs";
+import { MAX_ICON_SIZE, iconPath, validateIcon } from "./icon.mjs";
 import { verifyIntegrity } from "./npm.mjs";
 import { readPackageFiles } from "./tar.mjs";
 
@@ -8,6 +9,17 @@ function parseJson(buf) {
   } catch (err) {
     return { error: err.message };
   }
+}
+
+function loadIcon(tgz, rel, spec) {
+  const path = iconPath(rel);
+  const data = readPackageFiles(tgz, [path]).get(path);
+  const label = `icon ${JSON.stringify(rel)}`;
+  if (!data) return { error: `${label} is missing from ${spec}` };
+  if (data.length > MAX_ICON_SIZE) return { error: `${label} is ${data.length} bytes, larger than ${MAX_ICON_SIZE}` };
+  const error = validateIcon(data);
+  if (error) return { error: `${label}: ${error}` };
+  return { svg: data.toString("utf8").trim() };
 }
 
 async function inspectEntry(entry, registry) {
@@ -58,10 +70,13 @@ async function inspectEntry(entry, registry) {
   }
   const result = category.inspectManifest(manifest.value, entry.id);
   errors.push(...result.errors.map((e) => `${category.manifestFile}: ${e}`));
+  const icon = result.icon === undefined ? {} : loadIcon(tgz, result.icon, spec);
+  if (icon.error) errors.push(`${category.manifestFile}: ${icon.error}`);
   if (errors.length > 0) return { errors };
+  const info = icon.svg === undefined ? result.info : { ...result.info, icon: icon.svg };
   return {
     errors,
-    resolved: { info: result.info, license: pkg.license, publishedAt: doc.time?.[version], integrity, tarball },
+    resolved: { info, license: pkg.license, publishedAt: doc.time?.[version], integrity, tarball },
   };
 }
 

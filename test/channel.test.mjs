@@ -114,3 +114,22 @@ test("fills a missing or empty English name with the id", () => {
   assert.deepEqual(nameOf({}), { en: "discord" });
   assert.deepEqual(nameOf({ en: "", zh: "飞书" }), { en: "discord", zh: "飞书" });
 });
+
+test("accepts an icon path and returns it", () => {
+  const result = channel.inspectManifest(manifest({ icon: "assets/icon.svg" }), "discord");
+  assert.deepEqual(result.errors, []);
+  assert.equal(result.icon, "assets/icon.svg");
+  assert.equal("icon" in result.info, false);
+});
+
+test("returns no icon when the manifest has none", () => {
+  assert.equal("icon" in channel.inspectManifest(manifest(), "discord"), false);
+});
+
+test("rejects icon values that are not an svg path inside the plugin", () => {
+  for (const icon of ["", "icon.png", "/abs/icon.svg", "../icon.svg", "a/../../icon.svg", "a\\icon.svg", 1, null, { path: "icon.svg" }]) {
+    const { errors, info } = channel.inspectManifest(manifest({ icon }), "discord");
+    assert.deepEqual(errors, [`icon ${JSON.stringify(icon)} must be a relative path to an .svg file inside the plugin`]);
+    assert.equal(info, null);
+  }
+});

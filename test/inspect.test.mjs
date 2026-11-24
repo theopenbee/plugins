@@ -120,3 +120,74 @@ test("collect returns npm errors and resolved entries", async () => {
   assert.equal(repo.entries.length, 1);
   assert.equal(resolved.size, 1);
 });
+
+const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M0 0h24v24H0z"/></svg>`;
+
+function withIcon(icon, extra = {}) {
+  return {
+    "package.json": { name: "@theopenbee/channel-discord", version: "0.1.0", license: "MIT" },
+    "openbee.plugin.json": { ...discordManifest, icon },
+    ...extra,
+  };
+}
+
+async function iconErrors(icon, extra) {
+  const { errors } = await inspect(npmPackage({ files: withIcon(icon, extra) }).routes);
+  return errors;
+}
+
+test("embeds the manifest icon", async () => {
+  const pkg = npmPackage({ files: withIcon("./assets/icon.svg", { "assets/icon.svg": `\n${iconSvg}\n` }) });
+  const { errors, resolved } = await inspect(pkg.routes);
+  assert.deepEqual(errors, []);
+  assert.equal(resolved.get(discord).info.icon, iconSvg);
+});
+
+test("leaves icon out when the manifest has none", async () => {
+  const { resolved } = await inspect(npmPackage().routes);
+  assert.equal("icon" in resolved.get(discord).info, false);
+});
+
+test("reports a missing icon file", async () => {
+  assert.deepEqual(await iconErrors("icon.svg"), [
+    `${discord}: openbee.plugin.json: icon "icon.svg" is missing from @theopenbee/channel-discord@0.1.0`,
+  ]);
+});
+
+test("reports an icon that is too large", async () => {
+  const big = `<svg xmlns="http://www.w3.org/2000/svg">${" ".repeat(32768)}</svg>`;
+  assert.deepEqual(await iconErrors("icon.svg", { "icon.svg": big }), [
+    `${discord}: openbee.plugin.json: icon "icon.svg" is ${Buffer.byteLength(big)} bytes, larger than 32768`,
+  ]);
+});
+
+test("reports icons that break the icon rules", async () => {
+  const cases = [
+    [`<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>`, "<script> is not allowed"],
+    [`<svg xmlns="http://www.w3.org/2000/svg" onload="alert(1)"/>`, 'event attribute "onload" is not allowed'],
+    [`<svg xmlns="http://www.w3.org/2000/svg"><image href="https://example.com/a.png"/></svg>`, "links outside the icon are not allowed"],
+    [`<!DOCTYPE svg><svg xmlns="http://www.w3.org/2000/svg"/>`, "DOCTYPE and ENTITY declarations are not allowed"],
+  ];
+  for (const [svg, message] of cases) {
+    assert.deepEqual(await iconErrors("icon.svg", { "icon.svg": svg }), [
+      `${discord}: openbee.plugin.json: icon "icon.svg": ${message}`,
+    ]);
+  }
+});
+
+test("reports an icon path outside the package before reading it", async () => {
+  for (const icon of ["icon.png", "/icon.svg", "../icon.svg", 7]) {
+    assert.deepEqual(await iconErrors(icon, { "icon.png": iconSvg }), [
+      `${discord}: openbee.plugin.json: icon ${JSON.stringify(icon)} must be a relative path to an .svg file inside the plugin`,
+    ]);
+  }
+});
+
+test("reports icon errors together with package.json errors", async () => {
+  const files = { ...withIcon("icon.svg"), "package.json": { name: "@theopenbee/channel-discord", version: "0.1.0" } };
+  const { errors } = await inspect(npmPackage({ files }).routes);
+  assert.deepEqual(errors, [
+    `${discord}: package.json has no license`,
+    `${discord}: openbee.plugin.json: icon "icon.svg" is missing from @theopenbee/channel-discord@0.1.0`,
+  ]);
+});

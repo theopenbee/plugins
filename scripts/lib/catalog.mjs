@@ -22,6 +22,7 @@ function pluginOf(entry, resolved) {
     name: resolved.info.name,
   };
   if (resolved.info.description !== undefined) plugin.description = resolved.info.description;
+  if (resolved.info.icon !== undefined) plugin.icon = resolved.info.icon;
   plugin.protocol_version = resolved.info.protocol_version;
   plugin.license = resolved.license;
   plugin.repository = data.repository;

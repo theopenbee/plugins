@@ -50,6 +50,11 @@ test("applies the shared manifest rules", () => {
   assert.match(errorsFor({ id: "claude" }).join("\n"), /"claude".*"pi"/);
   assert.match(errorsFor({ command: [] }).join("\n"), /command/);
   assert.match(errorsFor({ config: [{ key: "bot_name", type: "string" }] }).join("\n"), /reserved/);
+  assert.match(errorsFor({ icon: "../icon.svg" }).join("\n"), /icon/);
+});
+
+test("returns the icon path of an engine manifest", () => {
+  assert.equal(engine.inspectManifest(manifest({ icon: "icon.svg" }), "pi").icon, "icon.svg");
 });
 
 test("rejects a manifest that is not an object", () => {
