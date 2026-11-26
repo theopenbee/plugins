@@ -58,14 +58,14 @@ function configErrors(config) {
   return errors;
 }
 
-export function inspectCommon(manifest, id) {
+export function inspectCommon(manifest, id, { command = true } = {}) {
   if (!isObject(manifest)) return { errors: [`${manifestFile} must be a JSON object`], info: null };
   const errors = [];
   if (manifest.protocol_version !== protocolVersion) {
     errors.push(`unsupported protocol_version ${JSON.stringify(manifest.protocol_version)} (supported: ${protocolVersion})`);
   }
   if (manifest.id !== id) errors.push(`manifest id ${JSON.stringify(manifest.id)} does not match entry id "${id}"`);
-  if (!isCommand(manifest.command)) errors.push("manifest command must not be empty");
+  if (command && !isCommand(manifest.command)) errors.push("manifest command must not be empty");
   if (manifest.setup !== undefined && !(isObject(manifest.setup) && isCommand(manifest.setup.command))) {
     errors.push("manifest setup command must not be empty");
   }
