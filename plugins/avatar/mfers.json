@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schema/entry.schema.json",
+  "package": "@theopenbee/avatars-mfers",
+  "version": "0.1.0",
+  "repository": "https://github.com/theopenbee/avatars-mfers",
+  "maintainers": ["Qsnh"],
+  "min_openbee_version": "1.0.13"
+}
