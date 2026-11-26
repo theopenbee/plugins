@@ -1,4 +1,5 @@
 [
   { "id": "channel", "name": { "en": "Channels", "zh": "渠道" } },
-  { "id": "engine", "name": { "en": "Engines", "zh": "引擎" } }
+  { "id": "engine", "name": { "en": "Engines", "zh": "引擎" } },
+  { "id": "avatar", "name": { "en": "Avatars", "zh": "头像" } }
 ]

@@ -18,7 +18,7 @@ scripts/                       checks and catalog build
 
 ## Entries
 
-The category and id come from the file path. For channels the id is the channel id from the plugin's `openbee.plugin.json`, and for engines it is the engine id from the same file.
+The category and id come from the file path. For channels the id is the channel id from the plugin's `openbee.plugin.json`, for engines it is the engine id from the same file, and for avatars it is the avatar plugin's id.
 
 ```json
 {
@@ -68,7 +68,7 @@ Every pull request runs `npm run validate`, which checks every entry:
 - the path, category, id and fields are valid, tags exist, and no package is registered twice;
 - `package@version` is published on registry.npmjs.org and its tarball matches the npm integrity;
 - the tarball's `package.json` has the same name and version and declares a license;
-- the plugin manifest passes the category's rules (the same rules openbee applies to `openbee.plugin.json`; engine manifests must also declare `"type": "engine"` and no `setup`);
+- the plugin manifest passes the category's rules (the same rules openbee applies to `openbee.plugin.json`; engine manifests must also declare `"type": "engine"` and no `setup`; avatar manifests must declare `"type": "avatar"` and an `avatars` folder, and no `command`, `setup` or `config`);
 - the manifest's `icon`, when set, passes the [icon rules](#icons).
 
 Tarballs are read in memory. Nothing is extracted to disk and no package code runs.
